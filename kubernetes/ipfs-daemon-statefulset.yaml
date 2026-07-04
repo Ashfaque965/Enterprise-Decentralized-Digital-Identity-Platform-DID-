@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ipfs-daemon
+  namespace: nexuscore-identity
+spec:
+  serviceName: "ipfs-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipfs-daemon
+  template:
+    metadata:
+      labels:
+        app: ipfs-daemon
+    spec:
+      containers:
+        - name: go-ipfs
+          image: ipfs/go-ipfs:v0.26.0
+          env:
+            - name: IPFS_PATH
+              value: /data/ipfs
+          ports:
+            - containerPort: 4001
+              name: swarm
+            - containerPort: 5001
+              name: api
+            - containerPort: 8080
+              name: gateway
+          volumeMounts:
+            - name: ipfs-storage
+              mountPath: /data/ipfs
+  volumeClaimTemplates:
+    - metadata:
+        name: ipfs-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 20Gi
