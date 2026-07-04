@@ -1,0 +1,50 @@
+```yaml
+openapi: 3.0.3
+info:
+  title: NexusCore Decoupled Identity API Engine
+  version: 1.0.0
+  description: Ingress boundary definitions for decentralized user registrations and identity proofs.
+paths:
+  /api/v1/did/create:
+    post:
+      summary: Resolves and indexes a new Decentralized Identifier (DID) Document anchor.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - publicAddress
+                - documentUri
+              properties:
+                publicAddress:
+                  type: string
+                  pattern: '^0x[a-fA-F0-9]{42}$'
+                  example: "0x921A377bc547B2B64F1e56bE0E99318b3fD2896F"
+                documentUri:
+                  type: string
+                  format: uri
+                  example: "https://identity.nexuscore.network/metadata/did.json"
+      responses:
+        '201':
+          description: DID Document mapped and successfully written onto local database caches.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  did:
+                    type: string
+                  anchorStatus:
+                    type: string
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

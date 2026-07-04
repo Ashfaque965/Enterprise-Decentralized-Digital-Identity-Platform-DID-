@@ -1,0 +1,16 @@
+{
+  "name": "nexuscore-identity-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "backend/*",
+    "client/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

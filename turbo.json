@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turbo.build/schema.v2.json",
+  "ui": "stream",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "out/**"],
+      "inputs": ["src/**/*.ts", "tsconfig.json"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.test.ts", "tests/**/*.ts"],
+      "outputs": []
+    },
+    "test:security": {
+      "dependsOn": ["build"],
+      "inputs": ["security/pentest/**"],
+      "cache": false
+    },
+    "deploy": {
+      "dependsOn": ["build", "test"],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

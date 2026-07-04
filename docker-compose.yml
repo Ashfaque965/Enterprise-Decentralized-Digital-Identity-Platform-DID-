@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexuscore-identity-postgres
+    environment:
+      POSTGRES_USER: nexus_admin
+      POSTGRES_DB: identity_platform
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vault_development_pass_2026}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_identity_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus_admin -d identity_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7.0
+    container_name: nexuscore-identity-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_credential_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: nexuscore-identity-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-cache_development_token}
+    volumes:
+      - redis_cache_data:/data
+
+volumes:
+  postgres_identity_data:
+    driver: local
+  mongo_credential_data:
+    driver: local
+  redis_cache_data:
+    driver: local
