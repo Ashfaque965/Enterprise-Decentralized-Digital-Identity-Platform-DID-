@@ -1,0 +1,14 @@
+{
+  "name": "@nexuscore/database",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.1",
+    "typeorm": "^0.3.20",
+    "pg": "^8.11.5"
+  }
+}

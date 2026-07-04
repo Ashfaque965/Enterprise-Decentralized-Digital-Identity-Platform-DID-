@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: credential-issuer-rollout
+  namespace: nexuscore-identity
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      analysis:
+        templates:
+          - templateName: identity-error-rate-analysis
+        args:
+          - name: service-name
+            value: credential-issuer-service
+      steps:
+        - setWeight: 10
+        - pause: { duration: 5m } # Wait window for localized traffic evaluations
+        - setWeight: 25
+        - pause: { duration: 10m }
+        - setWeight: 50
+        - pause: { duration: 5m }
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: credential-issuer
+  template:
+    metadata:
+      labels:
+        app: credential-issuer
+    spec:
+      containers:
+        - name: core-issuer-node
+          image: nexuscore-registry.internal/identity/credential-issuer:latest
+          ports:
+            - containerPort: 8081
+              name: http-api
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: identity-error-rate-analysis
+  namespace: nexuscore-identity
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    successCondition: result[0] >= 0.995 # Enforce a strict 99.5% HTTP request success rate
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus-k8s.nexuscore-infra.svc.cluster.local:9090
+        query: |
+          sum(rate(http_requests_total{status!~"5.*", app="credential-issuer"}[2m])) 
+          / 
+          sum(rate(http_requests_total{app="credential-issuer"}[2m]))

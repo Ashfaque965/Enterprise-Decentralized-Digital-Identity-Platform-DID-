@@ -1,0 +1,24 @@
+{
+  "roles": {
+    "SUPER_IDENTITY_ADMIN": {
+      "description": "System architecture automation account",
+      "allowedActions": [
+        "did:create",
+        "did:update",
+        "organization:configure",
+        "roles:allocate"
+      ],
+      "resourceScope": ["*"]
+    },
+    "TRUSTED_ISSUER_OPERATOR": {
+      "description": "Institutional credentials management profile",
+      "allowedActions": ["credential:issue", "credential:revoke"],
+      "resourceScope": ["identity.nexuscore.network/api/v1/credential/*"]
+    },
+    "COMPLIANCE_AUDITOR": {
+      "description": "Data privacy enforcement inspector role",
+      "allowedActions": ["audit:read", "transactions:read"],
+      "resourceScope": ["identity.nexuscore.network/api/v1/audit"]
+    }
+  }
+}

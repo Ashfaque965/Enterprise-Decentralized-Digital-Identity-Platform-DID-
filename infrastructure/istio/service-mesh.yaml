@@ -1,0 +1,53 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: nexuscore-identity
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: nexuscore-identity-gateway
+  namespace: nexuscore-identity
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      credentialName: nexuscore-mesh-ingress-certs
+      clientCertificateSNI: "api.identity.nexuscore.io"
+    hosts:
+    - "api.identity.nexuscore.io"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: issuer-mesh-route
+  namespace: nexuscore-identity
+spec:
+  hosts:
+  - "api.identity.nexuscore.io"
+  gateways:
+  - nexuscore-identity-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/credentials
+    route:
+    - destination:
+        host: credential-issuer-service.nexuscore-identity.svc.cluster.local
+        port:
+          number: 8081
+      timeout: 5s
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,connect-failure,refused-stream"

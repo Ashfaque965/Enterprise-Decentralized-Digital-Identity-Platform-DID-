@@ -1,0 +1,57 @@
+global:
+  environment: production
+  storageClass: "ebs-gp3-sc"
+
+# Apache Kafka Cluster Settings
+kafka:
+  replicaCount: 3
+  persistence:
+    enabled: true
+    size: 500Gi
+  config:
+    auto.create.topics.enable: "false"
+    num.partitions: 12
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    log.retention.hours: 168
+  resources:
+    limits:
+      cpu: "4000m"
+      memory: "8192Mi"
+    requests:
+      cpu: "2000m"
+      memory: "4096Mi"
+
+# Redis In-Memory Token Cache Matrix
+redis:
+  architecture: "replication"
+  replica:
+    replicaCount: 3
+  auth:
+    enabled: true
+    existingSecret: "nexuscore-redis-auth-vault"
+  master:
+    persistence:
+      size: 50Gi
+    resources:
+      limits:
+        cpu: "2000m"
+        memory: "4096Mi"
+
+# MongoDB Scaled Shard Cluster Setup
+mongodb-sharded:
+  auth:
+    enabled: true
+  configsvr:
+    replicaCount: 3
+  shardsvr:
+    dataNode:
+      replicaCount: 3
+      persistence:
+        size: 1000Gi
+  mongos:
+    replicaCount: 4
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "2048Mi"
